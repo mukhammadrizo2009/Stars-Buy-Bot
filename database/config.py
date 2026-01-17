@@ -14,11 +14,17 @@ class Config:
 
 class RegisterStates():
     NAME = 0
-    GRADE = 1
-    CLASS_TEACHER = 2
-    CONFIRM = 3
+    PHONE_NUMBER =1
+    CONFIRM = 2
 
+class TOPUP_STATES:
+    AMOUNT = 1
+    CHECK = 2
     
+class ADMIN_IDS:
+    ADMIN = os.getenv("ADMIN_IDS")
         
 config = Config()
 register_states = RegisterStates()
+topup_states = TOPUP_STATES()
+admin = ADMIN_IDS()
