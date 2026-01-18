@@ -5,11 +5,6 @@ from database.config import admin
 from database.database import LocalSession
 from database.models import User, Admin
 
-def admin_payments(update: Update, context: CallbackContext):
-    update.callback_query.message.reply_text(
-        "💰 To'lovlar bo'limi\n\n"
-        "Bu yerda userlardan kelgan cheklarni ko'rasiz."
-    )
 
 def send_payment_to_admin(
     update: Update,

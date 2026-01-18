@@ -3,10 +3,9 @@ from telegram.ext import CallbackContext, ConversationHandler
 
 from database.models import StarPackage, Admin
 from database.database import LocalSession
-from database.config import admin, ADMIN_ADD
-from admin.payments import admin_payments
+from database.config import admin, ADMIN_ADD, STAR
 from admin.users import admin_users
-from admin.stats import admin_stats
+
 
 
 def is_admin(user_id: int) -> bool:
@@ -38,9 +37,9 @@ def admin_panel(update: Update, context: CallbackContext):
 
     keyboard = [
         [InlineKeyboardButton("👥 Adminlar", callback_data="admin:admins")],
-        [InlineKeyboardButton("💰 To'lovlar", callback_data="admin:payments")],
+        
         [InlineKeyboardButton("👥 Foydalanuvchilar", callback_data="admin:users")],
-        [InlineKeyboardButton("📊 Statistika", callback_data="admin:stats")],
+        
         [InlineKeyboardButton("⭐ Stars narxlari", callback_data="admin:stars")]
     ]
 
@@ -59,23 +58,25 @@ def admin_menu_callback(update: Update, context: CallbackContext):
     if not is_admin(user_id):
         update.message.reply_text("⛔ Siz admin emassiz")
         return
-
-    if query.data == "admin:payments":
-        admin_payments(update, context)
+    
+    elif query.data == "admin:admins":
+        admin_admins(update, context)
 
     elif query.data == "admin:users":
         admin_users(update, context)
-
-    elif query.data == "admin:stats":
-        admin_stats(update, context)
         
     elif query.data == "admin:stars":
         admin_stars(update, context)
         
-    elif query.data == "admin:admins":
-        admin_admins(update, context)
-
+        
+        
 def admin_stars(update: Update, context: CallbackContext):
+    user_id = update.effective_user.id
+
+    if not is_admin(user_id):
+        update.message.reply_text("⛔ Siz admin emassiz")
+        return
+    
     query = update.callback_query
     query.answer()
 
@@ -100,17 +101,40 @@ def admin_stars(update: Update, context: CallbackContext):
     )
 
 def edit_star_price(update: Update, context: CallbackContext):
+    
+    user_id = update.effective_user.id
+
+    if not is_admin(user_id):
+        update.message.reply_text("⛔ Siz admin emassiz")
+        return
+    
     query = update.callback_query
     query.answer()
 
     stars = int(query.data.split(":")[1])
-    context.user_data["edit_star"] = stars
+    context.user_data["edit_star"] = stars  # 🔑
 
-    query.message.reply_text(
-        f"💵 {stars} Stars uchun yangi narxni kiriting:"
+    # ⬇️ INLINE KEYBOARD YO‘QOLADI
+    query.edit_message_text(
+        f"💵 <b>{stars} Stars</b> uchun yangi narxni kiriting:",
+        parse_mode="HTML"
     )
-    
+
+    return STAR.STAR_EDIT
+
+
 def save_star_price(update: Update, context: CallbackContext):
+    
+    user_id = update.effective_user.id
+
+    if not is_admin(user_id):
+        update.message.reply_text("⛔ Siz admin emassiz")
+        return
+    
+    if "edit_star" not in context.user_data:
+        update.message.reply_text("❌ Xatolik. Qaytadan urinib ko‘ring.")
+        return ConversationHandler.END
+
     price = int(update.message.text)
     stars = context.user_data["edit_star"]
 
@@ -124,8 +148,17 @@ def save_star_price(update: Update, context: CallbackContext):
     )
 
     context.user_data.clear()
+    return ConversationHandler.END
+
 
 def admin_admins(update: Update, context: CallbackContext):
+    
+    user_id = update.effective_user.id
+
+    if not is_admin(user_id):
+        update.message.reply_text("⛔ Siz admin emassiz")
+        return
+    
     query = update.callback_query
     query.answer()
 
@@ -147,12 +180,33 @@ def admin_admins(update: Update, context: CallbackContext):
     )
 
 def start_add_admin(update: Update, context: CallbackContext):
-    update.message.reply_text(
-        "🆔 Admin qilinadigan foydalanuvchi ID sini yuboring:"
+    
+    user_id = update.effective_user.id
+
+    if not is_admin(user_id):
+        update.message.reply_text("⛔ Siz admin emassiz")
+        return
+    
+    query = update.callback_query
+    query.answer()
+
+    # ⬇️ eski xabar + tugmalar YO‘QOLADI
+    query.edit_message_text(
+        "🆔 <b>Admin qilinadigan foydalanuvchi ID sini yuboring:</b>",
+        parse_mode="HTML"
     )
+
     return ADMIN_ADD.ADD
 
+
 def save_admin(update: Update, context: CallbackContext):
+    
+    user_id = update.effective_user.id
+
+    if not is_admin(user_id):
+        update.message.reply_text("⛔ Siz admin emassiz")
+        return
+    
     admin_id = int(update.message.text)
 
     with LocalSession() as session:
@@ -167,12 +221,33 @@ def save_admin(update: Update, context: CallbackContext):
     return ConversationHandler.END
 
 def start_remove_admin(update: Update, context: CallbackContext):
-    update.message.reply_text(
-        "🆔 O'chiriladigan admin ID sini yuboring:"
+    
+    user_id = update.effective_user.id
+
+    if not is_admin(user_id):
+        update.message.reply_text("⛔ Siz admin emassiz")
+        return
+    
+    query = update.callback_query
+    query.answer()
+
+    # ⬇️ eski xabar + tugmalar YO‘QOLADI
+    query.edit_message_text(
+        "🆔 <b>O‘chiriladigan admin ID sini yuboring:</b>",
+        parse_mode="HTML"
     )
+
     return ADMIN_ADD.REMOVE
 
+
 def delete_admin(update: Update, context: CallbackContext):
+    
+    user_id = update.effective_user.id
+
+    if not is_admin(user_id):
+        update.message.reply_text("⛔ Siz admin emassiz")
+        return
+    
     admin_id = int(update.message.text)
 
     with LocalSession() as session:

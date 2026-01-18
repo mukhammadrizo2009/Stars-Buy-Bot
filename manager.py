@@ -1,4 +1,4 @@
-from database.config import config, register_states, topup_states, ADMIN_ADD
+from database.config import config, register_states, topup_states, ADMIN_ADD, STAR
 from telegram.ext import (
     Updater,
     CommandHandler,
@@ -74,7 +74,7 @@ def main() -> None:
 
     dispatcher.add_handler(topup_handler)
     
-    dispatcher.add_handler(CallbackQueryHandler(admin_menu_callback, pattern=r"^admin:"))
+    
     dispatcher.add_handler(CallbackQueryHandler(payment_decision,pattern=r"^pay:"))
 
     dispatcher.add_handler(MessageHandler(Filters.text("Ha ✅"), confirm_buy))
@@ -88,9 +88,21 @@ def main() -> None:
     dispatcher.add_handler(CallbackQueryHandler(admin_buy_decision, pattern="^admin_buy_"))
     
     dispatcher.add_handler(CallbackQueryHandler(admin_stars, pattern="^admin:stars$"))
-    dispatcher.add_handler(CallbackQueryHandler(edit_star_price, pattern="^edit_star:"))
-    dispatcher.add_handler(MessageHandler(Filters.text & Filters.regex("^[0-9]+$"), save_star_price))
-    
+    star_price_conv = ConversationHandler(
+    entry_points=[
+        CallbackQueryHandler(edit_star_price, pattern="^edit_star:")
+    ],
+    states={
+        STAR.STAR_EDIT: [
+            MessageHandler(Filters.text & Filters.regex("^[0-9]+$"), save_star_price)
+        ]
+    },
+    fallbacks=[],
+    per_message=False
+)
+
+    dispatcher.add_handler(star_price_conv)
+
     admin_conv = ConversationHandler(
     entry_points=[
         CallbackQueryHandler(start_add_admin, pattern="^admin:add$"),
@@ -105,12 +117,13 @@ def main() -> None:
         ],
     },
     fallbacks=[],
-    per_message=True
+    per_message=False
     )
     dispatcher.add_handler(admin_conv)
     dispatcher.add_handler(
     CallbackQueryHandler(admin_admins, pattern="^admin:admins$")
     )
+    dispatcher.add_handler(CallbackQueryHandler(admin_menu_callback, pattern=r"^admin:"))
 
 
 

@@ -17,9 +17,11 @@ class RegisterStates():
     PHONE_NUMBER =1
     CONFIRM = 2
 
+
 class TOPUP_STATES:
     AMOUNT = 1
     CHECK = 2
+    
     
 class ADMIN_ADD:
     ADD = 1
@@ -29,8 +31,12 @@ class ADMIN_ADD:
 class ADMIN_IDS:
     SUPERADMIN_ID = int(os.getenv("SUPERADMIN_ID"))
      
+class STAR:
+    STAR_EDIT = 1
+    
 config = Config()
 register_states = RegisterStates()
 topup_states = TOPUP_STATES()
 admin = ADMIN_IDS()
-add_admin =ADMIN_ADD()
+add_admin = ADMIN_ADD()
+star = STAR()
