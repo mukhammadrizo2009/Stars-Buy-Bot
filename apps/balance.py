@@ -48,7 +48,7 @@ def get_check(update: Update, context: CallbackContext):
         update.message.reply_text("❌ Xatolik. Qayta urinib ko'ring.")
         return ConversationHandler.END
 
-    # 📸 Rasm yoki файлni tekshiramiz
+
     if update.message.photo:
         file_id = update.message.photo[-1].file_id
         is_photo = True
@@ -61,7 +61,7 @@ def get_check(update: Update, context: CallbackContext):
         )
         return topup_states.CHECK
 
-    # 👑 ADMINga yuboramiz
+
     send_payment_to_admin(
         update=update,
         context=context,
@@ -71,11 +71,13 @@ def get_check(update: Update, context: CallbackContext):
         file_id=file_id,
         is_photo=is_photo
     )
+    
 
-    # 👤 USERga javob
-    keyboard = InlineKeyboardMarkup([
+    keyboard = InlineKeyboardMarkup(
+        [
         [InlineKeyboardButton("📞 Admin bilan bog'lanish", url="https://t.me/mirzayeoff")]
-    ])
+    ]
+        )
 
     update.message.reply_text(
         "✅ <b>To'lov qabul qilindi.</b>\n\n"
