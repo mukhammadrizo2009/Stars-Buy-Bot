@@ -3,6 +3,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from .config import config
 
+
 url = URL.create(
     drivername="postgresql+psycopg2",
     host=config.DB_HOST,
@@ -11,6 +12,7 @@ url = URL.create(
     password=config.DB_PASSWORD,
     database=config.DB_NAME 
 )
+
 
 engine = create_engine(url)
 Base = declarative_base()
