@@ -36,7 +36,7 @@ def register_message(update: Update, context: CallbackContext):
     )
 
 
-# NAME
+
 def get_name(update: Update, context: CallbackContext):
     bot = context.bot
     user = update.effective_user
@@ -70,11 +70,11 @@ def set_name(update: Update, context: CallbackContext):
     return register_states.PHONE_NUMBER
 
 
-# PHONE_NUMBER
+
 def set_phone(update: Update, context: CallbackContext):
     contact = update.message.contact
 
-    # Xavfsizlik: faqat o'z raqamini yuborsa
+
     if contact.user_id != update.effective_user.id:
         update.message.reply_text(
             "❌ Iltimos, faqat O'Z telefon raqamingizni yuboring.\n\
@@ -108,7 +108,7 @@ def set_phone(update: Update, context: CallbackContext):
 
 
 
-# SAVE
+
 def save_user(update: Update, context: CallbackContext):
     user_tg = update.effective_user
     data = context.user_data
