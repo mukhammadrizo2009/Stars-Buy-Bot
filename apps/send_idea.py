@@ -1,4 +1,4 @@
-from telegram import Update, ReplyKeyboardMarkup, KeyboardButton
+from telegram import (Update, ReplyKeyboardMarkup, KeyboardButton)
 from telegram.ext import CallbackContext
 
 def send_idea(update: Update, context: CallbackContext):
