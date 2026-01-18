@@ -18,6 +18,7 @@ def send_menu(update: Update , context: CallbackContext):
         )
     )
     
+    
 def user_already_register(update: Update , context: CallbackContext):
     bot = context.bot
     user = update.effective_user
