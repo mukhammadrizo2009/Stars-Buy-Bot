@@ -19,7 +19,10 @@ from apps.price_stars import seed_star_packages
 from admin.admin_panel import admin_panel, admin_menu_callback, save_star_price, admin_stars, edit_star_price, start_remove_admin, admin_admins, start_add_admin, delete_admin, save_admin
 from admin.payments import payment_decision
 
-Base.metadata.create_all(engine)
+#Base.metadata.drop_all(bind=engine)
+Base.metadata.create_all(bind=engine)
+
+#print("✅ Database tozalandi va qayta yaratildi")
 
 def main() -> None:
     updater = Updater(config.BOT_TOKEN)
