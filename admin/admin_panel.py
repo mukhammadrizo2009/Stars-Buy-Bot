@@ -9,11 +9,11 @@ from admin.users import admin_users
 
 
 def is_admin(user_id: int) -> bool:
-    # SUPER ADMINS
+
     if user_id == admin.SUPERADMIN_ID:
         return True
 
-    # oddiy adminlar DB dan
+
     with LocalSession() as session:
         return session.query(Admin).filter_by(
             telegram_id=user_id
@@ -89,7 +89,7 @@ def admin_stars(update: Update, context: CallbackContext):
     for pkg in packages:
         text += f"⭐ {pkg.stars} → 💵 {pkg.price:,} so'm\n"
 
-        # 🔒 FAQAT SUPER ADMIN KO‘RADI
+
         if is_superadmin(user_id):
             keyboard.append([
                 InlineKeyboardButton(
@@ -135,12 +135,12 @@ def save_star_price(update: Update, context: CallbackContext):
 
     if not is_superadmin(user_id):
         update.message.reply_text(
-            "⛔ Stars narxini faqat SUPER ADMIN o‘zgartira oladi"
+            "⛔ Stars narxini faqat SUPER ADMIN o'zgartira oladi"
         )
         return ConversationHandler.END
 
     if "edit_star" not in context.user_data:
-        update.message.reply_text("❌ Xatolik. Qaytadan urinib ko‘ring.")
+        update.message.reply_text("❌ Xatolik. Qaytadan urinib ko'ring.")
         return ConversationHandler.END
 
     price = int(update.message.text)
@@ -174,7 +174,7 @@ def admin_admins(update: Update, context: CallbackContext):
     with LocalSession() as session:
         admins = session.query(Admin).all()
 
-    text = "👥 Adminlar ro‘yxati:\n\n"
+    text = "👥 Adminlar ro'yxati:\n\n"
     for a in admins:
         text += f"🆔 {a.telegram_id}\n"
 
@@ -197,7 +197,7 @@ def start_add_admin(update: Update, context: CallbackContext):
 
     if not is_superadmin(user_id):
         update.callback_query.answer(
-            "⛔ Faqat Super Admin admin qo‘sha oladi",
+            "⛔ Faqat Super Admin admin qo'sha oladi",
             show_alert=True
         )
         return ConversationHandler.END
@@ -232,7 +232,7 @@ def save_admin(update: Update, context: CallbackContext):
         session.add(Admin(telegram_id=admin_id))
         session.commit()
 
-    update.message.reply_text("✅ Admin muvaffaqiyatli qo‘shildi")
+    update.message.reply_text("✅ Admin muvaffaqiyatli qo'shildi")
     return ConversationHandler.END
 
 def start_remove_admin(update: Update, context: CallbackContext):
@@ -241,7 +241,7 @@ def start_remove_admin(update: Update, context: CallbackContext):
 
     if not is_superadmin(user_id):
         update.callback_query.answer(
-            "⛔ Faqat Super Admin admin o‘chira oladi",
+            "⛔ Faqat Super Admin admin o'chira oladi",
             show_alert=True
         )
         return ConversationHandler.END
@@ -275,11 +275,11 @@ def delete_admin(update: Update, context: CallbackContext):
         ).first()
 
         if not admin:
-            update.message.reply_text("❌ Bunday admin yo‘q")
+            update.message.reply_text("❌ Bunday admin yo'q")
             return ConversationHandler.END
 
         session.delete(admin)
         session.commit()
 
-    update.message.reply_text("✅ Admin o‘chirildi")
+    update.message.reply_text("✅ Admin o'chirildi")
     return ConversationHandler.END
