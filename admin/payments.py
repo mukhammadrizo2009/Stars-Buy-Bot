@@ -60,10 +60,10 @@ def send_payment_to_admin(
             reply_markup=InlineKeyboardMarkup(keyboard)
         )
 
-    # Boshqa adminlarga yuborish
+
     for a in admins:
         if a.telegram_id == admin.SUPERADMIN_ID:
-            continue  # Super adminni o'tkazib yuborish
+            continue  
         if is_photo:
             bot.send_photo(
                 chat_id=a.telegram_id,
