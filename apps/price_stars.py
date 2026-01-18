@@ -1,4 +1,4 @@
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import (Update, InlineKeyboardButton, InlineKeyboardMarkup)
 from telegram.ext import CallbackContext
 from database.models import StarPackage
 from database.database import LocalSession
