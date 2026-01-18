@@ -30,6 +30,7 @@ class StarPackage(Base):
     stars = Column(Integer, nullable=False, unique=True)
     price = Column(BigInteger, nullable=False)
 
+
 class Admin(Base):
     __tablename__ = "admins"
 
