@@ -2,7 +2,7 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CallbackContext, ConversationHandler
 from database.config import topup_states, admin
 from admin.payments import send_payment_to_admin
-ADMIN_ID = admin.ADMIN
+ADMIN_ID = admin.SUPERADMIN_ID
 
 
 def increase_balance(update: Update, context: CallbackContext):
@@ -74,16 +74,20 @@ def get_check(update: Update, context: CallbackContext):
 
     # 👤 USERga javob
     keyboard = InlineKeyboardMarkup([
-    [
-        InlineKeyboardButton("📞 Admin bilan bog‘lanish", url="https://t.me/mirzayeoff")
-    ]
+        [InlineKeyboardButton("📞 Admin bilan bog'lanish", url="https://t.me/mirzayeoff")]
     ])
+
     update.message.reply_text(
-    "✅ <b>To'lov qabul qilindi.</b>\n\n"
-    "⏳ Admin tekshiruvdan so'ng balansingiz to'ldiriladi.",
-    reply_markup=keyboard,
-    parse_mode="HTML"
-)
+        "✅ <b>To'lov qabul qilindi.</b>\n\n"
+        "⏳ Admin tekshiruvdan so'ng balansingiz to'ldiriladi.",
+        reply_markup=keyboard,
+        parse_mode="HTML"
+    )
 
     context.user_data.clear()
+    return ConversationHandler.END
+
+
+def cancel_topup(update: Update, context: CallbackContext):
+    update.message.reply_text("❌ Amal bekor qilindi")
     return ConversationHandler.END

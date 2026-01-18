@@ -1,4 +1,4 @@
-from database.config import config, register_states, topup_states
+from database.config import config, register_states, topup_states, ADMIN_ADD
 from telegram.ext import (
     Updater,
     CommandHandler,
@@ -13,9 +13,10 @@ from apps.register import check_register, get_name, set_name, set_phone, save_us
 from apps.profile import profile
 from apps.menu import send_menu
 from apps.send_idea import send_idea
-from apps.buy_stars import buy_stars_callback, buy_stars, confirm_buy
-from apps.balance import increase_balance, get_amount, get_check
-from admin.admin_panel import admin_panel, admin_menu_callback
+from apps.buy_stars import buy_stars_callback, buy_stars, confirm_buy, admin_buy_decision, cancel_buy
+from apps.balance import increase_balance, get_amount, get_check, cancel_topup
+from apps.price_stars import seed_star_packages
+from admin.admin_panel import admin_panel, admin_menu_callback, save_star_price, admin_stars, edit_star_price, start_remove_admin, admin_admins, start_add_admin, delete_admin, save_admin
 from admin.payments import payment_decision
 
 Base.metadata.create_all(engine)
@@ -23,6 +24,8 @@ Base.metadata.create_all(engine)
 def main() -> None:
     updater = Updater(config.BOT_TOKEN)
     dispatcher = updater.dispatcher
+    
+    #seed_star_packages()
     
     dispatcher.add_handler(CommandHandler('start', start))
     dispatcher.add_handler(CommandHandler('admin', admin_panel))
@@ -64,7 +67,9 @@ def main() -> None:
             MessageHandler(Filters.photo | Filters.document, get_check)
         ],
     },
-    fallbacks=[]
+    fallbacks=[
+        CommandHandler("cancel", cancel_topup)
+    ]
     )
 
     dispatcher.add_handler(topup_handler)
@@ -76,6 +81,36 @@ def main() -> None:
     dispatcher.add_handler(MessageHandler(Filters.text("Yo'q ❌"), confirm_buy))
     
     dispatcher.add_handler(CallbackQueryHandler(send_menu, pattern="^menu$"))
+    
+    dispatcher.add_handler(CallbackQueryHandler(confirm_buy, pattern="^confirm_buy:"))
+    dispatcher.add_handler(CallbackQueryHandler(cancel_buy, pattern="^cancel_buy$"))
+
+    dispatcher.add_handler(CallbackQueryHandler(admin_buy_decision, pattern="^admin_buy_"))
+    
+    dispatcher.add_handler(CallbackQueryHandler(admin_stars, pattern="^admin:stars$"))
+    dispatcher.add_handler(CallbackQueryHandler(edit_star_price, pattern="^edit_star:"))
+    dispatcher.add_handler(MessageHandler(Filters.text & Filters.regex("^[0-9]+$"), save_star_price))
+    
+    admin_conv = ConversationHandler(
+    entry_points=[
+        CallbackQueryHandler(start_add_admin, pattern="^admin:add$"),
+        CallbackQueryHandler(start_remove_admin, pattern="^admin:remove$")
+    ],
+    states={
+        ADMIN_ADD.ADD: [
+            MessageHandler(Filters.text & ~Filters.command, save_admin)
+        ],
+        ADMIN_ADD.REMOVE: [
+            MessageHandler(Filters.text & ~Filters.command, delete_admin)
+        ],
+    },
+    fallbacks=[],
+    per_message=True
+    )
+    dispatcher.add_handler(admin_conv)
+    dispatcher.add_handler(
+    CallbackQueryHandler(admin_admins, pattern="^admin:admins$")
+    )
 
 
 

@@ -3,7 +3,7 @@ from telegram.ext import CallbackContext
 
 from database.config import admin
 from database.database import LocalSession
-from database.models import User
+from database.models import User, Admin
 
 def admin_payments(update: Update, context: CallbackContext):
     update.callback_query.message.reply_text(
@@ -21,6 +21,9 @@ def send_payment_to_admin(
     file_id,
     is_photo=True
     ):
+    with LocalSession() as session:
+        # 👥 Oddiy adminlar
+        admins = session.query(Admin).all()
     
     bot = context.bot
     user = update._effective_user
@@ -45,20 +48,42 @@ def send_payment_to_admin(
         f"💵 {amount:,} so'm"
     )
 
+
+# Super adminga yuborish
     if is_photo:
         bot.send_photo(
-            chat_id=admin.ADMIN,
+            chat_id=admin.SUPERADMIN_ID,
             photo=file_id,
             caption=caption,
             reply_markup=InlineKeyboardMarkup(keyboard)
         )
     else:
         bot.send_document(
-            chat_id=admin.ADMIN,
+            chat_id=admin.SUPERADMIN_ID,
             document=file_id,
             caption=caption,
             reply_markup=InlineKeyboardMarkup(keyboard)
         )
+
+    # Boshqa adminlarga yuborish
+    for a in admins:
+        if a.telegram_id == admin.SUPERADMIN_ID:
+            continue  # Super adminni o'tkazib yuborish
+        if is_photo:
+            bot.send_photo(
+                chat_id=a.telegram_id,
+                photo=file_id,
+                caption=caption,
+                reply_markup=InlineKeyboardMarkup(keyboard)
+            )
+        else:
+            bot.send_document(
+                chat_id=a.telegram_id,
+                document=file_id,
+                caption=caption,
+                reply_markup=InlineKeyboardMarkup(keyboard)
+            )
+
 
 def payment_decision(update: Update, context: CallbackContext):
     query = update.callback_query

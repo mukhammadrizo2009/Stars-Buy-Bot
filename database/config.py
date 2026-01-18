@@ -21,10 +21,16 @@ class TOPUP_STATES:
     AMOUNT = 1
     CHECK = 2
     
+class ADMIN_ADD:
+    ADD = 1
+    REMOVE = 2
+    
+    
 class ADMIN_IDS:
-    ADMIN = os.getenv("ADMIN_IDS")
-        
+    SUPERADMIN_ID = int(os.getenv("SUPERADMIN_ID"))
+     
 config = Config()
 register_states = RegisterStates()
 topup_states = TOPUP_STATES()
 admin = ADMIN_IDS()
+add_admin =ADMIN_ADD()

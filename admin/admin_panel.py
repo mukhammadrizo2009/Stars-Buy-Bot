@@ -1,14 +1,30 @@
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
-from telegram.ext import CallbackContext
+from telegram.ext import CallbackContext, ConversationHandler
 
-from database.config import admin
+from database.models import StarPackage, Admin
+from database.database import LocalSession
+from database.config import admin, ADMIN_ADD
 from admin.payments import admin_payments
 from admin.users import admin_users
 from admin.stats import admin_stats
 
 
 def is_admin(user_id: int) -> bool:
-    return user_id in [6293681152]
+    # SUPER ADMINS
+    if user_id == admin.SUPERADMIN_ID:
+        return True
+
+    # oddiy adminlar DB dan
+    with LocalSession() as session:
+        return session.query(Admin).filter_by(
+            telegram_id=user_id
+        ).first() is not None
+
+
+
+
+def is_superadmin(user_id: int) -> bool:
+    return user_id == admin.SUPERADMIN_ID
 
 
 def admin_panel(update: Update, context: CallbackContext):
@@ -17,11 +33,15 @@ def admin_panel(update: Update, context: CallbackContext):
     if not is_admin(user_id):
         update.message.reply_text("⛔ Siz admin emassiz")
         return
+       
+    update.message.reply_text("👑 Admin panelga xush kelibsiz") 
 
     keyboard = [
+        [InlineKeyboardButton("👥 Adminlar", callback_data="admin:admins")],
         [InlineKeyboardButton("💰 To'lovlar", callback_data="admin:payments")],
         [InlineKeyboardButton("👥 Foydalanuvchilar", callback_data="admin:users")],
-        [InlineKeyboardButton("📊 Statistika", callback_data="admin:stats")]
+        [InlineKeyboardButton("📊 Statistika", callback_data="admin:stats")],
+        [InlineKeyboardButton("⭐ Stars narxlari", callback_data="admin:stars")]
     ]
 
     update.message.reply_text(
@@ -30,9 +50,15 @@ def admin_panel(update: Update, context: CallbackContext):
     )
 
 
+
 def admin_menu_callback(update: Update, context: CallbackContext):
+    user_id = update.effective_user.id
     query = update.callback_query
     query.answer()
+    
+    if not is_admin(user_id):
+        update.message.reply_text("⛔ Siz admin emassiz")
+        return
 
     if query.data == "admin:payments":
         admin_payments(update, context)
@@ -42,3 +68,124 @@ def admin_menu_callback(update: Update, context: CallbackContext):
 
     elif query.data == "admin:stats":
         admin_stats(update, context)
+        
+    elif query.data == "admin:stars":
+        admin_stars(update, context)
+        
+    elif query.data == "admin:admins":
+        admin_admins(update, context)
+
+def admin_stars(update: Update, context: CallbackContext):
+    query = update.callback_query
+    query.answer()
+
+    with LocalSession() as session:
+        packages = session.query(StarPackage).all()
+
+    text = "⭐ Stars paketlar:\n\n"
+    keyboard = []
+
+    for pkg in packages:
+        text += f"⭐ {pkg.stars} → 💵 {pkg.price:,} so'm\n"
+        keyboard.append([
+            InlineKeyboardButton(
+                f"✏️ {pkg.stars} Stars",
+                callback_data=f"edit_star:{pkg.stars}"
+            )
+        ])
+
+    query.message.reply_text(
+        text,
+        reply_markup=InlineKeyboardMarkup(keyboard)
+    )
+
+def edit_star_price(update: Update, context: CallbackContext):
+    query = update.callback_query
+    query.answer()
+
+    stars = int(query.data.split(":")[1])
+    context.user_data["edit_star"] = stars
+
+    query.message.reply_text(
+        f"💵 {stars} Stars uchun yangi narxni kiriting:"
+    )
+    
+def save_star_price(update: Update, context: CallbackContext):
+    price = int(update.message.text)
+    stars = context.user_data["edit_star"]
+
+    with LocalSession() as session:
+        pkg = session.query(StarPackage).filter_by(stars=stars).first()
+        pkg.price = price
+        session.commit()
+
+    update.message.reply_text(
+        f"✅ {stars} Stars narxi yangilandi: {price:,} so'm"
+    )
+
+    context.user_data.clear()
+
+def admin_admins(update: Update, context: CallbackContext):
+    query = update.callback_query
+    query.answer()
+
+    with LocalSession() as session:
+        admins = session.query(Admin).all()
+
+    text = "👥 Adminlar ro‘yxati:\n\n"
+    for a in admins:
+        text += f"🆔 {a.telegram_id}\n"
+
+    keyboard = [
+        [InlineKeyboardButton("➕ Admin qo'shish", callback_data="admin:add")],
+        [InlineKeyboardButton("➖ Admin o'chirish", callback_data="admin:remove")]
+    ]
+
+    query.edit_message_text(
+        text,
+        reply_markup=InlineKeyboardMarkup(keyboard)
+    )
+
+def start_add_admin(update: Update, context: CallbackContext):
+    update.message.reply_text(
+        "🆔 Admin qilinadigan foydalanuvchi ID sini yuboring:"
+    )
+    return ADMIN_ADD.ADD
+
+def save_admin(update: Update, context: CallbackContext):
+    admin_id = int(update.message.text)
+
+    with LocalSession() as session:
+        if session.query(Admin).filter_by(telegram_id=admin_id).first():
+            update.message.reply_text("⚠️ Bu foydalanuvchi allaqachon admin")
+            return ConversationHandler.END
+
+        session.add(Admin(telegram_id=admin_id))
+        session.commit()
+
+    update.message.reply_text("✅ Admin muvaffaqiyatli qo‘shildi")
+    return ConversationHandler.END
+
+def start_remove_admin(update: Update, context: CallbackContext):
+    update.message.reply_text(
+        "🆔 O'chiriladigan admin ID sini yuboring:"
+    )
+    return ADMIN_ADD.REMOVE
+
+def delete_admin(update: Update, context: CallbackContext):
+    admin_id = int(update.message.text)
+
+    with LocalSession() as session:
+        admin = session.query(Admin).filter_by(
+            telegram_id=admin_id
+        ).first()
+
+        if not admin:
+            update.message.reply_text("❌ Bunday admin yo‘q")
+            return ConversationHandler.END
+
+        session.delete(admin)
+        session.commit()
+
+    update.message.reply_text("✅ Admin o‘chirildi")
+    return ConversationHandler.END
