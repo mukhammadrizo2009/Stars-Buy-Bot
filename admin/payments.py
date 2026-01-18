@@ -44,7 +44,7 @@ def send_payment_to_admin(
     )
 
 
-# Super adminga yuborish
+
     if is_photo:
         bot.send_photo(
             chat_id=admin.SUPERADMIN_ID,
