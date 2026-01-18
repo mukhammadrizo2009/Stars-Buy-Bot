@@ -34,14 +34,14 @@ def confirm_buy(update: Update, context: CallbackContext):
     stars = int(query.data.split(":")[1])
 
     with LocalSession() as session:
-        # 👤 User
+  
         db_user = session.query(User).filter_by(
             telegram_id=user.id
         ).first()
 
         balance = db_user.balance if db_user and db_user.balance else 0
 
-        # ⭐ Stars paketi
+        
         package = session.query(StarPackage).filter_by(
             stars=stars
         ).first()
@@ -52,10 +52,10 @@ def confirm_buy(update: Update, context: CallbackContext):
 
         price = package.price
 
-        # 👥 Oddiy adminlar
+    
         admins = session.query(Admin).all()
 
-    # 👤 Userga javob
+
     query.edit_message_text(
         "✅ Buyurtma adminga yuborildi.\n\n"
         "⏳ Admin tasdiqlashini kuting..."
@@ -83,16 +83,16 @@ def confirm_buy(update: Update, context: CallbackContext):
         f"💵 Narx: {price:,} so'm"
     )
 
-    # 👑 SUPER ADMIN
+  
     context.bot.send_message(
         chat_id=admin.SUPERADMIN_ID,
         text=text,
         reply_markup=keyboard
     )
 
-    # 👮 ODDIY ADMINLAR
+ 
     for a in admins:
-        # super admin qayta yuborilmasin
+      
         if a.telegram_id == admin.SUPERADMIN_ID:
             continue
 
@@ -124,7 +124,7 @@ def buy_stars_callback(update: Update, context: CallbackContext):
         ).first()
         balance = db_user.balance if db_user else 0
 
-    # 🔥 ESKI XABARNI ALMASHTIRAMIZ
+    
     query.edit_message_text(
         text=(
             "🧾 Buyurtma:\n"
@@ -153,7 +153,7 @@ def admin_buy_decision(update: Update, context: CallbackContext):
     query.answer()
 
     data = query.data.split(":")
-    action = data[0]          # admin_buy_ok / admin_buy_no
+    action = data[0]          
     user_id = int(data[1])
 
     with LocalSession() as session:
@@ -174,7 +174,7 @@ def admin_buy_decision(update: Update, context: CallbackContext):
                 query.edit_message_text("❌ User balansida mablag' yetarli emas")
                 return
 
-            # 💰 balansdan yechamiz
+          
             user.balance -= price
             user.stars += stars
             session.commit()
@@ -197,7 +197,7 @@ def cancel_buy(update: Update, context: CallbackContext):
     query = update.callback_query
     query.answer()
 
-    # user_data ni tozalaymiz
+ 
     context.user_data.pop("stars", None)
     context.user_data.pop("price", None)
 
