@@ -1,10 +1,10 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
-from telegram.ext import CallbackContext
+from telegram.ext import CallbackContext, ConversationHandler
 
 from database.database import LocalSession
 from database.models import User, Admin
 from database.models import StarPackage
-from database.config import admin
+from database.config import admin, PAYMENT
 
 def buy_stars(update: Update, context: CallbackContext):
     keyboard = []

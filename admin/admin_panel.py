@@ -1,7 +1,7 @@
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import CallbackContext, ConversationHandler
 
-from database.models import StarPackage, Admin
+from database.models import StarPackage, Admin, PaymentCard
 from database.database import LocalSession
 from database.config import admin, ADMIN_ADD, STAR
 from admin.users import admin_users
@@ -40,7 +40,9 @@ def admin_panel(update: Update, context: CallbackContext):
         
         [InlineKeyboardButton("👥 Foydalanuvchilar", callback_data="admin:users")],
         
-        [InlineKeyboardButton("⭐ Stars narxlari", callback_data="admin:stars")]
+        [InlineKeyboardButton("⭐ Stars narxlari", callback_data="admin:stars")],
+        
+        [InlineKeyboardButton("💳 To'lov kartalari", callback_data="admin:cards")],
     ]
 
     update.message.reply_text(
@@ -68,8 +70,9 @@ def admin_menu_callback(update: Update, context: CallbackContext):
     elif query.data == "admin:stars":
         admin_stars(update, context)
         
-        
-        
+    elif query.data == "admin:cards":
+        admin_cards(update, context)
+         
 def admin_stars(update: Update, context: CallbackContext):
     user_id = update.effective_user.id
 
@@ -283,3 +286,40 @@ def delete_admin(update: Update, context: CallbackContext):
 
     update.message.reply_text("✅ Admin o'chirildi")
     return ConversationHandler.END
+
+
+def admin_cards(update: Update, context: CallbackContext):
+    
+    user_id = update.effective_user.id
+    
+    if not is_superadmin(user_id):
+        update.callback_query.answer(
+            "⛔ Faqat Super Admin admin o'chira oladi",
+            show_alert=True
+        )
+        return
+
+    query = update.callback_query
+    query.answer()
+
+    with LocalSession() as session:
+        cards = session.query(PaymentCard).all()
+
+    text = "💳 <b>To‘lov kartalari</b>\n\n"
+    keyboard = []
+
+    for c in cards:
+        text += f"🔹 {c.card_number} ({c.card_type})\n"
+        keyboard.append([
+            InlineKeyboardButton("❌ O'chirish", callback_data=f"card:del:{c.id}")
+        ])
+
+    keyboard.append([
+        InlineKeyboardButton("➕ Karta qo'shish", callback_data="card:add")
+    ])
+
+    query.edit_message_text(
+        text,
+        reply_markup=InlineKeyboardMarkup(keyboard),
+        parse_mode="HTML"
+    )

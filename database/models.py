@@ -4,7 +4,9 @@ from sqlalchemy import (
     BigInteger,
     Integer,
     String,
+    Boolean,
     DateTime,
+    JSON
     )
 from .database import Base
 
@@ -37,3 +39,22 @@ class Admin(Base):
     id = Column(Integer, primary_key=True)
     telegram_id = Column(BigInteger, unique=True, nullable=False)
     added_at = Column(DateTime, default=datetime.utcnow)
+    
+
+class PaymentCard(Base):
+    __tablename__ = "payment_cards"
+
+    id = Column(Integer, primary_key=True)
+    card_number = Column(String(32), nullable=False)
+    card_type = Column(String(20))  # Visa, MasterCard, Uzcard
+    is_active = Column(Boolean, default=True)
+
+
+class Payment(Base):
+    __tablename__ = "payments"
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer)
+    amount = Column(Integer)
+    status = Column(String, default="pending")  # pending / approved / rejected
+    admin_messages = Column(JSON)  # {admin_id: message_id}

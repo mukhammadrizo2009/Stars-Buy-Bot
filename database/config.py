@@ -28,6 +28,10 @@ class ADMIN_ADD:
     REMOVE = 2
     
     
+class PAYMENT:
+    CUSTOM_AMOUNT = 1
+
+    
 class ADMIN_IDS:
     SUPERADMIN_ID = int(os.getenv("SUPERADMIN_ID"))
      
@@ -35,9 +39,16 @@ class ADMIN_IDS:
 class STAR:
     STAR_EDIT = 1
     
+
+class CARD:
+    NUMBER = 1
+    TYPE = 2
+  
 config = Config()
 register_states = RegisterStates()
 topup_states = TOPUP_STATES()
 admin = ADMIN_IDS()
 add_admin = ADMIN_ADD()
+payment = PAYMENT()
 star = STAR()
+card = CARD()

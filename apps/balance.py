@@ -1,21 +1,36 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CallbackContext, ConversationHandler
+
 from database.config import topup_states, admin
+from database.database import LocalSession
+from database.models import PaymentCard
+
 from admin.payments import send_payment_to_admin
+
 ADMIN_ID = admin.SUPERADMIN_ID
 
 
 def increase_balance(update: Update, context: CallbackContext):
-    update.message.reply_text(
-        "💳 <b>To'lov uchun karta raqamlari</b>\n\n"
-        "🔹 <code>4439 2000 2691 5271</code> (Visa)\n"
-        "🔹 <code>4439 2000 2725 5040</code> (Visa)\n\n"
-        "━━━━━━━━━━━━━━━━━━\n"
+    with LocalSession() as session:
+        cards = session.query(PaymentCard).filter_by(is_active=True).all()
+
+    if not cards:
+        update.message.reply_text("❌ Hozircha to‘lov kartalari mavjud emas.")
+        return ConversationHandler.END
+
+    text = "💳 <b>To'lov uchun karta raqamlari</b>\n\n"
+
+    for c in cards:
+        text += f"🔹 <code>{c.card_number}</code> ({c.card_type})\n"
+
+    text += (
+        "\n━━━━━━━━━━━━━━━━━━\n"
         "💵 <b>To'lov miqdorini kiriting</b>\n\n"
         "📌 Minimal summa: <b>10 000 so'm</b>\n"
-        "✏️ Misol: <i>50000</i>",
-        parse_mode="HTML"
+        "✏️ Misol: <i>50000</i>"
     )
+
+    update.message.reply_text(text, parse_mode="HTML")
     return topup_states.AMOUNT
 
 
