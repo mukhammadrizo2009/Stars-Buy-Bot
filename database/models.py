@@ -46,7 +46,7 @@ class PaymentCard(Base):
 
     id = Column(Integer, primary_key=True)
     card_number = Column(String(32), nullable=False)
-    card_type = Column(String(20))  # Visa, MasterCard, Uzcard
+    card_type = Column(String(20))
     is_active = Column(Boolean, default=True)
 
 
@@ -54,7 +54,17 @@ class Payment(Base):
     __tablename__ = "payments"
 
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer)
+    user_id = Column(BigInteger)
     amount = Column(Integer)
-    status = Column(String, default="pending")  # pending / approved / rejected
-    admin_messages = Column(JSON)  # {admin_id: message_id}
+    status = Column(String, default="pending")
+    admin_messages = Column(JSON)
+
+class StarsOrder(Base):
+    __tablename__ = "stars_orders"
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(BigInteger) 
+    stars = Column(BigInteger)
+    price = Column(BigInteger)
+    status = Column(String, default="pending")
+    admin_messages = Column(JSON)

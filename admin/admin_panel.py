@@ -291,16 +291,18 @@ def delete_admin(update: Update, context: CallbackContext):
 def admin_cards(update: Update, context: CallbackContext):
     
     user_id = update.effective_user.id
-    
-    if not is_superadmin(user_id):
-        update.callback_query.answer(
-            "⛔ Faqat Super Admin admin o'chira oladi",
-            show_alert=True
-        )
-        return
-
     query = update.callback_query
-    query.answer()
+    
+    # Foydalanuvchi superadminmi yoki yo'qligini tekshiramiz
+    is_super = is_superadmin(user_id)
+    
+    # Agar foydalanuvchi umuman admin bo'lmasa (ixtiyoriy tekshiruv)
+    # if not is_admin(user_id): 
+    #     query.answer("Ruxsat berilmagan", show_alert=True)
+    #     return
+
+    if query:
+        query.answer()
 
     with LocalSession() as session:
         cards = session.query(PaymentCard).all()
@@ -308,18 +310,33 @@ def admin_cards(update: Update, context: CallbackContext):
     text = "💳 <b>To‘lov kartalari</b>\n\n"
     keyboard = []
 
-    for c in cards:
-        text += f"🔹 {c.card_number} ({c.card_type})\n"
+    if not cards:
+        text += "Hozircha kartalar qo'shilmagan."
+    else:
+        for i, c in enumerate(cards, start=1):
+            text += f"{i}. <code>{c.card_number}</code> ({c.card_type})\n"
+            
+            # FAQAT Super Admin uchun o'chirish tugmasini chiqaramiz
+            if is_super:
+                keyboard.append([
+                    InlineKeyboardButton(f"❌ {i}-kartani o'chirish", callback_data=f"card:del:{c.id}")
+                ])
+
+    # FAQAT Super Admin uchun karta qo'shish tugmasini chiqaramiz
+    if is_super:
         keyboard.append([
-            InlineKeyboardButton("❌ O'chirish", callback_data=f"card:del:{c.id}")
+            InlineKeyboardButton("➕ Karta qo'shish", callback_data="card:add")
         ])
 
-    keyboard.append([
-        InlineKeyboardButton("➕ Karta qo'shish", callback_data="card:add")
-    ])
-
-    query.edit_message_text(
-        text,
-        reply_markup=InlineKeyboardMarkup(keyboard),
-        parse_mode="HTML"
-    )
+    if query:
+        query.edit_message_text(
+            text,
+            reply_markup=InlineKeyboardMarkup(keyboard),
+            parse_mode="HTML"
+        )
+    else:
+        update.message.reply_text(
+            text,
+            reply_markup=InlineKeyboardMarkup(keyboard),
+            parse_mode="HTML"
+        )

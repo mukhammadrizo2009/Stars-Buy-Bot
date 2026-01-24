@@ -43,6 +43,8 @@ class STAR:
 class CARD:
     NUMBER = 1
     TYPE = 2
+    
+CHANNEL_USERNAME = "@mirzayeoff_blog"
   
 config = Config()
 register_states = RegisterStates()

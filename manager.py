@@ -3,7 +3,7 @@ from telegram.ext import ( Updater, CommandHandler, MessageHandler, Filters, Cal
 from database.database import Base, engine
 from database.config import config
 
-from apps.start import start
+from apps.start import start, check_callback
 from apps.register import check_register
 from apps.profile import profile
 from apps.menu import send_menu
@@ -14,6 +14,7 @@ from apps.price_stars import seed_star_packages
 
 from admin.admin_panel import admin_panel, admin_menu_callback, admin_stars, admin_admins, admin_cards
 from admin.payments import payment_response
+from admin.add_card import delete_card_handler
 
 from apps.conversation import Register, Topup, Star_Price, Admin, Payment, Card
 
@@ -49,6 +50,8 @@ def main() -> None:
     
     dispatcher.add_handler(Card.card_conv)
     
+    dispatcher.add_handler(CallbackQueryHandler(check_callback, pattern="check_subscription"))
+    
     dispatcher.add_handler(MessageHandler(Filters.text("Profilim 👤"), profile))
     
     dispatcher.add_handler(MessageHandler(Filters.text("Menularga qaytish! ↩️"), send_menu))
@@ -76,6 +79,12 @@ def main() -> None:
     dispatcher.add_handler(CallbackQueryHandler(admin_menu_callback, pattern=r"^admin:"))
 
     dispatcher.add_handler(CallbackQueryHandler(admin_cards, pattern="^admin:cards$"))
+    
+    dispatcher.add_handler(CallbackQueryHandler(admin_cards, pattern="^admin_cards_list$"))
+
+    dispatcher.add_handler(CallbackQueryHandler(delete_card_handler, pattern="^card:del:"))
+    
+    dispatcher.add_handler(CallbackQueryHandler(admin_panel, pattern="^admin_menu$"))
 
     updater.start_polling()
     updater.idle()
