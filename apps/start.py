@@ -1,16 +1,6 @@
 from telegram import (Update, ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton)
 from telegram.ext import CallbackContext
-
-# KANAL SOZLAMALARI
-CHANNEL_ID = "@mirzayeoff_blog"  # Shu ko'rinishda yozing
-CHANNEL_LINK = "https://t.me/mirzayeoff_blog"
-
-from telegram import (Update, ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton)
-from telegram.ext import CallbackContext
-
-# KANAL SOZLAMALARI
-CHANNEL_ID = "@mirzayeoff_blog"  # ID o'rniga username qo'ydik
-CHANNEL_LINK = "https://t.me/mirzayeoff_blog"
+from database.config import CHANNEL_ID, CHANNEL_LINK
 
 def is_subscribed(bot, user_id):
     """Foydalanuvchi kanalga a'zo ekanligini tekshirish"""

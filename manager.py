@@ -9,6 +9,7 @@ from apps.profile import profile
 from apps.menu import send_menu
 from apps.send_idea import send_idea
 from apps.buy_stars import buy_stars_callback, buy_stars, confirm_buy, admin_buy_decision, cancel_buy
+#from apps.broadcast import broadcast
 
 from apps.price_stars import seed_star_packages
 
@@ -34,6 +35,8 @@ def main() -> None:
     
     dispatcher.add_handler(CommandHandler('start', start))
     dispatcher.add_handler(CommandHandler('admin', admin_panel))
+    #dispatcher.add_handler(CommandHandler("broadcast", broadcast))
+
 
     dispatcher.add_handler(MessageHandler(Filters.text("Shaxsingizni tasdiqlang! 🪪"), check_register))
     dispatcher.add_handler(MessageHandler(Filters.text("Ro'yhatdan o'tganman!✅"), check_register))

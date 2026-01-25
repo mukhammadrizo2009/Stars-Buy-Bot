@@ -1,4 +1,5 @@
 from .database import LocalSession
+from .models import User
 
 def get_db():
     db = LocalSession()
@@ -6,3 +7,8 @@ def get_db():
         yield db
     finally:
         db.close()
+
+def get_all_users():
+    with LocalSession() as session:
+        users = session.query(User).all()
+        return users

@@ -44,7 +44,8 @@ class CARD:
     NUMBER = 1
     TYPE = 2
     
-CHANNEL_USERNAME = "@mirzayeoff_blog"
+CHANNEL_ID = os.getenv("CHANNEL_ID")
+CHANNEL_LINK = os.getenv("CHANNEL_LINK")
   
 config = Config()
 register_states = RegisterStates()
